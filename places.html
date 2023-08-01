@@ -45,6 +45,10 @@
             maplibregl.addProtocol("pmtiles", protocol.tile);
 
             const EMPTY_CATEGORY_LABEL = "< empty >";
+            const DEFAULT_TEXT = "Zoom in to see places categories\nClick on category to highlight on a map";
+
+            let categories_container = document.getElementById('categories');
+            categories_container.innerText = DEFAULT_TEXT;
 
             function highlightLayer(category) {
                 if (category == EMPTY_CATEGORY_LABEL) {
@@ -133,14 +137,14 @@
                 }
             });
 
-            var currentHighlight = '';
+            let currentHighlight = '';
 
             function handle_category_click(event) {
-                var selectedElement = document.getElementById('selected_category');
+                let selectedElement = document.getElementById('selected_category');
                 if (selectedElement) {
                     selectedElement.removeAttribute('id');
                 }
-                var targetElement = event.target
+                let targetElement = event.target
                 currentHighlight = targetElement.dataset['id']
                 targetElement.setAttribute('id', 'selected_category');
                 
@@ -148,23 +152,23 @@
                 map.addLayer(highlightLayer(currentHighlight));
             }
 
-            var categories_container = document.getElementById('categories');
-
             categories_container.addEventListener("click", handle_category_click);
                 
             function redrawCategories(event) {
                 if (map.getZoom() < 13) {
-                    return
+                    categories_container.innerHTML = '';
+                    categories_container.innerText = DEFAULT_TEXT;
+                    return 
                 }
-                var features = map.queryRenderedFeatures({ layers: ['overture-pois'] });
-                var counts = features.reduce((acc, feat) => {
-                    var category = feat.properties.category_main || EMPTY_CATEGORY_LABEL
-                    var old_value = acc.get(category) || 0;
+                let features = map.queryRenderedFeatures({ layers: ['overture-pois'] });
+                let counts = features.reduce((acc, feat) => {
+                    let category = feat.properties.category_main || EMPTY_CATEGORY_LABEL
+                    let old_value = acc.get(category) || 0;
                     acc.set(category, old_value + 1);
                     return acc
                 }, new Map());
 
-                var sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+                let sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
 
                 categories_container.innerHTML = '';
                 sorted.forEach(function ([key, value]) {
